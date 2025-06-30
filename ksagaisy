@@ -102,23 +102,19 @@ local Slider = PlayerTab:CreateSlider({
 local AutoFarmTab = Window:CreateTab("AutoFarm", 4483362458) -- Title, Image
 
 local Toggle = AutoFarmTab:CreateToggle({
-   Name = "Auto Farm (NOT MADE YET)",
-   CurrentValue = false,
-   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
-      local RunService = game:GetService("RunService")
+local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
 local localPlayer = Players.LocalPlayer
 local autofarmConnection
+local hitboxPart
 
 -- Settings
 local FLOAT_HEIGHT = 25
-local MOVE_SPEED = 10
-local HITBOX_SIZE = Vector3.new(25, 25, 25) -- Enlarged hitbox
+local MOVE_SPEED = 175
+local HITBOX_SIZE = Vector3.new(10, 10, 10)
 
--- Get closest target
 local function getClosestTarget()
 	local myChar = localPlayer.Character
 	if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return nil end
@@ -141,43 +137,42 @@ local function getClosestTarget()
 	return closest
 end
 
--- Resize the player's hitbox to reach enemies
-local function enlargeHitbox()
-	local char = localPlayer.Character
-	if char and char:FindFirstChild("HumanoidRootPart") then
-		local hrp = char.HumanoidRootPart
-		hrp.Size = HITBOX_SIZE
-		hrp.Transparency = 0.8
-		hrp.CanCollide = false
-		hrp.Massless = true
-	end
+-- Create the extended hitbox
+local function createHitbox()
+	hitboxPart = Instance.new("Part")
+	hitboxPart.Size = HITBOX_SIZE
+	hitboxPart.Anchored = true
+	hitboxPart.CanCollide = false
+	hitboxPart.Transparency = 1
+	hitboxPart.Name = "AutoFarmHitbox"
+	hitboxPart.Parent = workspace
 end
 
--- Reset hitbox back to normal
-local function resetHitbox()
-	local char = localPlayer.Character
-	if char and char:FindFirstChild("HumanoidRootPart") then
-		local hrp = char.HumanoidRootPart
-		hrp.Size = Vector3.new(2, 2, 1)
-		hrp.Transparency = 1
+-- Destroy hitbox
+local function removeHitbox()
+	if hitboxPart and hitboxPart.Parent then
+		hitboxPart:Destroy()
 	end
+	hitboxPart = nil
 end
 
--- Toggle autofarm
 if Value then
-	enlargeHitbox()
+	createHitbox()
 
 	autofarmConnection = RunService.RenderStepped:Connect(function()
 		local char = localPlayer.Character
 		local hrp = char and char:FindFirstChild("HumanoidRootPart")
 		local target = getClosestTarget()
 
-		if hrp and target then
+		if hrp and target and hitboxPart then
 			local floatPos = target.Position + Vector3.new(0, FLOAT_HEIGHT, 0)
 			local direction = (floatPos - hrp.Position).Unit
 			hrp.Velocity = direction * MOVE_SPEED
 
-			-- Simulate left mouse punch
+			-- Position hitbox slightly below player to extend punch
+			hitboxPart.Position = hrp.Position - Vector3.new(0, 5, 0)
+
+			-- Simulate attack input
 			VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
 			VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
 		else
@@ -189,14 +184,14 @@ else
 		autofarmConnection:Disconnect()
 		autofarmConnection = nil
 	end
-	resetHitbox()
 
 	local char = localPlayer.Character
 	if char and char:FindFirstChild("HumanoidRootPart") then
 		char.HumanoidRootPart.Velocity = Vector3.zero
-	      end
-      end
-   end,
+	end
+
+	removeHitbox()
+end
 })
 
 local EspTab = Window:CreateTab("Esp", 4483362458) -- Title, Image
