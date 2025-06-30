@@ -1,0 +1,269 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Killer Hub | BloxFruits",
+   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "Killer Hub",
+   LoadingSubtitle = "by gou9907 on discord",
+   ShowText = "Killer Hub", -- for mobile users to unhide rayfield, change if you'd like
+   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+   ToggleUIKeybind = "K", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Big Hub"
+   },
+
+   Discord = {
+      Enabled = true, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "TxvFuct5F2", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = true, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Killer Hub Key System",
+      Subtitle = "Key System Get The Key From The Discord",
+      Note = "Join our discord for the key. https://discord.gg/TxvFuct5F2", -- Use this to tell the user how to get a key
+      FileName = "KeyThatIsSigmaTbh", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"erytiubnfdssdfrl"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local PlayerTab = Window:CreateTab("Player", 4483362458) -- Title, Image
+
+local Input = PlayerTab:CreateInput({
+   Name = "Text",
+   CurrentValue = "",
+   PlaceholderText = "Thank you for using Killer Hub join our discord for updates and giveaways",
+   RemoveTextAfterFocusLost = false,
+   Flag = "Input1",
+   Callback = function(Text)
+   -- The function that takes place when the input is changed
+   -- The variable (Text) is a string for the value in the text box
+   end,
+})
+
+local Slider = PlayerTab:CreateSlider({
+   Name = "Walkspeed",
+   Range = {10, 100},
+   Increment = 1,
+   Suffix = "Speed",
+   CurrentValue = 1,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+    game.Players.LocalPlayer.Character:SetAttribute("SpeedMultiplier", Value)
+   end,
+})
+
+local Slider = PlayerTab:CreateSlider({
+   Name = "Dash length",
+   Range = {10, 1000},
+   Increment = 1,
+   Suffix = "length",
+   CurrentValue = 1,
+   Flag = "Slider2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+    game.Players.LocalPlayer.Character:SetAttribute("DashLength", Value)
+   end,
+})
+
+local Slider = PlayerTab:CreateSlider({
+   Name = "Jump Height",
+   Range = {10, 1000},
+   Increment = 1,
+   Suffix = "Height",
+   CurrentValue = 1,
+   Flag = "Slider3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+   end,
+})
+
+local Slider = PlayerTab:CreateSlider({
+   Name = "Punch Cooldown",
+   Range = {0.01, 1},
+   Increment = 1,
+   Suffix = "CoolDown",
+   CurrentValue = 1,
+   Flag = "Slider4", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+    game.Players.LocalPlayer.Character:SetAttribute("MeleeCooldown", Value)
+   end,
+})
+
+local AutoFarmTab = Window:CreateTab("AutoFarm", 4483362458) -- Title, Image
+
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Farm (NOT MADE YET)",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+      local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+local localPlayer = Players.LocalPlayer
+local autofarmConnection
+
+-- Settings
+local FLOAT_HEIGHT = 25
+local MOVE_SPEED = 10
+local HITBOX_SIZE = Vector3.new(25, 25, 25) -- Enlarged hitbox
+
+-- Get closest target
+local function getClosestTarget()
+	local myChar = localPlayer.Character
+	if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return nil end
+
+	local closest = nil
+	local shortestDist = math.huge
+
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("Model") and v ~= myChar and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+			if v.Humanoid.Health > 0 then
+				local dist = (v.HumanoidRootPart.Position - myChar.HumanoidRootPart.Position).Magnitude
+				if dist < shortestDist then
+					shortestDist = dist
+					closest = v.HumanoidRootPart
+				end
+			end
+		end
+	end
+
+	return closest
+end
+
+-- Resize the player's hitbox to reach enemies
+local function enlargeHitbox()
+	local char = localPlayer.Character
+	if char and char:FindFirstChild("HumanoidRootPart") then
+		local hrp = char.HumanoidRootPart
+		hrp.Size = HITBOX_SIZE
+		hrp.Transparency = 0.8
+		hrp.CanCollide = false
+		hrp.Massless = true
+	end
+end
+
+-- Reset hitbox back to normal
+local function resetHitbox()
+	local char = localPlayer.Character
+	if char and char:FindFirstChild("HumanoidRootPart") then
+		local hrp = char.HumanoidRootPart
+		hrp.Size = Vector3.new(2, 2, 1)
+		hrp.Transparency = 1
+	end
+end
+
+-- Toggle autofarm
+if Value then
+	enlargeHitbox()
+
+	autofarmConnection = RunService.RenderStepped:Connect(function()
+		local char = localPlayer.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		local target = getClosestTarget()
+
+		if hrp and target then
+			local floatPos = target.Position + Vector3.new(0, FLOAT_HEIGHT, 0)
+			local direction = (floatPos - hrp.Position).Unit
+			hrp.Velocity = direction * MOVE_SPEED
+
+			-- Simulate left mouse punch
+			VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+			VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+		else
+			if hrp then hrp.Velocity = Vector3.zero end
+		end
+	end)
+else
+	if autofarmConnection then
+		autofarmConnection:Disconnect()
+		autofarmConnection = nil
+	end
+	resetHitbox()
+
+	local char = localPlayer.Character
+	if char and char:FindFirstChild("HumanoidRootPart") then
+		char.HumanoidRootPart.Velocity = Vector3.zero
+	      end
+      end
+   end,
+})
+
+local EspFarmTab = Window:CreateTab("Esp", 4483362458) -- Title, Image
+
+local Toggle = EspFarmTab:CreateToggle({
+   Name = "Esp",
+   CurrentValue = false,
+   Flag = "Toggle2",
+   Callback = function(Value)
+      local Players = game:GetService("Players")
+      local RunService = game:GetService("RunService")
+      local localPlayer = Players.LocalPlayer
+
+      local function createHighlight(character)
+         if not character:FindFirstChild("PlayerHighlight") then
+            local highlight = Instance.new("Highlight")
+            highlight.Name = "PlayerHighlight"
+            highlight.FillColor = Color3.fromRGB(0, 255, 0)
+            highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlight.Parent = character
+         end
+      end
+
+      local function setupPlayer(player)
+         if player == localPlayer then return end
+         player.CharacterAdded:Connect(function(character)
+            character:WaitForChild("HumanoidRootPart")
+            createHighlight(character)
+         end)
+         if player.Character then
+            createHighlight(player.Character)
+         end
+      end
+
+      if Value then
+         for _, player in pairs(Players:GetPlayers()) do
+            setupPlayer(player)
+         end
+         Players.PlayerAdded:Connect(setupPlayer)
+
+         -- Store connection to disconnect later if toggled off
+         if not _G.espConn then
+            _G.espConn = RunService.RenderStepped:Connect(function()
+               local myChar = localPlayer.Character
+               if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return end
+
+               for _, player in pairs(Players:GetPlayers()) do
+                  if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                     local dist = (myChar.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                     print(player.Name .. " | Distance: " .. math.floor(dist) .. " studs")
+                  end
+               end
+            end)
+         end
+      else
+         -- Disable ESP
+         for _, player in pairs(Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("PlayerHighlight") then
+               player.Character.PlayerHighlight:Destroy()
+            end
+         end
+
+         if _G.espConn then
+            _G.espConn:Disconnect()
+            _G.espConn = nil
+         end
+      end
+   end,
+})
