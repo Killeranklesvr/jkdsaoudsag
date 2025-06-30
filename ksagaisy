@@ -106,7 +106,7 @@ local Toggle = AutoFarmTab:CreateToggle({
    CurrentValue = false,
    Flag = "Toggle1",
    Callback = function(Value)
-local RunService = game:GetService("RunService")
+      local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
@@ -114,7 +114,6 @@ local localPlayer = Players.LocalPlayer
 local autofarmConnection
 local hitboxPart
 
--- Settings
 local FLOAT_HEIGHT = 25
 local MOVE_SPEED = 175
 local HITBOX_SIZE = Vector3.new(10, 10, 10)
@@ -141,7 +140,6 @@ local function getClosestTarget()
 	return closest
 end
 
--- Create the extended hitbox
 local function createHitbox()
 	hitboxPart = Instance.new("Part")
 	hitboxPart.Size = HITBOX_SIZE
@@ -152,7 +150,6 @@ local function createHitbox()
 	hitboxPart.Parent = workspace
 end
 
--- Destroy hitbox
 local function removeHitbox()
 	if hitboxPart and hitboxPart.Parent then
 		hitboxPart:Destroy()
@@ -173,14 +170,14 @@ if Value then
 			local direction = (floatPos - hrp.Position).Unit
 			hrp.Velocity = direction * MOVE_SPEED
 
-			-- Position hitbox slightly below player to extend punch
+			-- Position hitbox below player
 			hitboxPart.Position = hrp.Position - Vector3.new(0, 5, 0)
 
-			-- Simulate attack input
+			-- Simulate left-click punch
 			VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
 			VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-		else
-			if hrp then hrp.Velocity = Vector3.zero end
+		elseif hrp then
+			hrp.Velocity = Vector3.zero
 		end
 	end)
 else
@@ -195,7 +192,8 @@ else
 	end
 
 	removeHitbox()
-end
+      end
+   end,
 })
 
 local EspTab = Window:CreateTab("Esp", 4483362458) -- Title, Image
