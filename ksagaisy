@@ -114,7 +114,7 @@ local localPlayer = Players.LocalPlayer
 local autofarmConnection
 local hitboxPart
 
-local FLOAT_HEIGHT = 25
+local FLOAT_HEIGHT = 0
 local MOVE_SPEED = 175
 local HITBOX_SIZE = Vector3.new(10, 10, 10)
 
