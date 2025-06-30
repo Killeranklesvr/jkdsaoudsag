@@ -102,6 +102,10 @@ local Slider = PlayerTab:CreateSlider({
 local AutoFarmTab = Window:CreateTab("AutoFarm", 4483362458) -- Title, Image
 
 local Toggle = AutoFarmTab:CreateToggle({
+   Name = "AutoFarm",
+   CurrentValue = false,
+   Flag = "Toggle1",
+   Callback = function(Value)
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local VirtualInputManager = game:GetService("VirtualInputManager")
